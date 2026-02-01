@@ -1,7 +1,7 @@
-import { DigestWithParsed } from "@/lib/db";
+import { Digest } from "@/lib/types";
 
 interface DigestCardProps {
-  digest: DigestWithParsed;
+  digest: Digest;
   expanded?: boolean;
 }
 

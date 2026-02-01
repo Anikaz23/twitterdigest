@@ -1,18 +1,25 @@
 services:
-  dashboard:
+  # API Server - serves digest data to dashboard
+  api:
     build:
-      context: ../dashboard
+      context: ../server
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "8080:8080"
     volumes:
       - digest-data:/data
     environment:
       - DB_PATH=/data/digests.db
-    depends_on:
-      - agent
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - PORT=8080
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # OpenClaw Agent - browses Twitter and generates digests
   agent:
     build:
       context: ../agent
@@ -24,9 +31,23 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - DB_PATH=/data/digests.db
     restart: unless-stopped
-    # Uncomment to access OpenClaw gateway from host
-    # ports:
-    #   - "18789:18789"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # Uncomment below to self-host dashboard (instead of Vercel)
+  # dashboard:
+  #   build:
+  #     context: ../dashboard
+  #     dockerfile: Dockerfile
+  #     args:
+  #       - API_URL=http://api:8080
+  #       - NEXT_PUBLIC_API_URL=http://localhost:8080
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - api
+  #   restart: unless-stopped
 
 volumes:
   digest-data:

@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import DigestCard from "./DigestCard";
-import { DigestWithParsed } from "@/lib/db";
+import { Digest } from "@/lib/types";
 
 interface DigestListProps {
-  initialDigests: DigestWithParsed[];
+  initialDigests: Digest[];
   initialHasMore: boolean;
 }
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export default function DigestList({
   initialDigests,
@@ -23,7 +25,7 @@ export default function DigestList({
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/digests?offset=${offset}&limit=10`);
+      const response = await fetch(`${API_URL}/digests?offset=${offset}&limit=10`);
       const data = await response.json();
 
       setDigests((prev) => [...prev, ...data.digests]);

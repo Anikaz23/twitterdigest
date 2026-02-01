@@ -1,86 +1,114 @@
 # Twitter Digest
 
-AI-powered Twitter feed summarizer. Runs on a VPS, digests your Twitter "For You" feed every 3 hours, and displays summaries on a dashboard.
+AI-powered Twitter feed summarizer. Runs on a VPS, digests your Twitter "For You" feed every 3 hours, and displays summaries on a globally-distributed dashboard.
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────┐
-│              VPS (Docker)               │
-│  ┌──────────────┐  ┌──────────────┐    │
-│  │   OpenClaw   │  │  Dashboard   │    │
-│  │   Agent      │  │  (Next.js)   │    │
-│  │   + Browser  │  │  Port 3000   │    │
-│  └──────┬───────┘  └──────┬───────┘    │
-│         └────────┬────────┘            │
-│              SQLite DB                  │
-└─────────────────────────────────────────┘
+Vercel (Global Edge)                 VPS (Oracle Cloud)
+┌─────────────────────┐              ┌─────────────────────┐
+│     Dashboard       │              │   Docker Compose    │
+│     (Next.js)       │    HTTPS     │  ┌───────────────┐  │
+│                     │ ────────────►│  │  API Server   │  │
+│  Fast everywhere    │              │  └───────┬───────┘  │
+│                     │              │          │          │
+│  platform.ts        │              │  ┌───────▼───────┐  │
+│  (edge isolation)   │              │  │    Agent      │  │
+└─────────────────────┘              │  │  + Browser    │  │
+                                     │  └───────┬───────┘  │
+                                     │          │          │
+                                     │  ┌───────▼───────┐  │
+                                     │  │   SQLite DB   │  │
+                                     │  └───────────────┘  │
+                                     └─────────────────────┘
 ```
 
 ## Features
 
 - Automatic Twitter feed digestion every 3 hours
 - AI-generated summaries with topic extraction
-- Clean dashboard to view digests
-- VPS-agnostic (swap providers without code changes)
-- Docker-based deployment
+- Dashboard on Vercel Edge (fast globally)
+- VPS-agnostic (swap Oracle for any provider)
+- Platform-agnostic dashboard (swap Vercel for any host)
+- Edge-specific code isolated to ONE file
 
 ## Quick Start
 
-### Deploy to VPS
+### 1. Deploy API + Agent to VPS
 
 ```bash
 # SSH into your VPS
 ssh user@your-vps-ip
 
-# Run setup script
-curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/twitterdigest/main/deploy/setup-vps.sh | bash
-
-# Configure
-cd ~/twitterdigest/deploy
+# Clone and configure
+git clone https://github.com/YOUR_USERNAME/twitterdigest.git
+cd twitterdigest/deploy
 cp .env.example .env
-nano .env  # Add your ANTHROPIC_API_KEY
+nano .env  # Add ANTHROPIC_API_KEY
 
 # Start
 docker compose up -d
 ```
 
-Access: `http://YOUR_VPS_IP:3000`
+Open firewall port 8080.
 
-### Local Development
+### 2. Deploy Dashboard to Vercel
 
 ```bash
-cd deploy
-cp .env.example .env
-# Add your ANTHROPIC_API_KEY to .env
+# Install Vercel CLI
+npm i -g vercel
 
-docker compose up --build
-# Dashboard at http://localhost:3000
+# Deploy dashboard
+cd dashboard
+vercel
+
+# Set environment variable in Vercel dashboard:
+# API_URL = http://YOUR_VPS_IP:8080
+# NEXT_PUBLIC_API_URL = http://YOUR_VPS_IP:8080
 ```
+
+Access your dashboard at your Vercel URL.
 
 ## Project Structure
 
 ```
 twitterdigest/
-├── dashboard/          # Next.js web app
-├── agent/              # OpenClaw agent + browser
+├── dashboard/          # Next.js (deploys to Vercel)
+│   └── src/lib/
+│       ├── platform.ts         # ⚡ Edge-specific (only file to change)
+│       ├── platform.standard.ts # Non-edge fallback
+│       └── api.ts              # API client
+├── server/             # Express API (runs on VPS)
+├── agent/              # OpenClaw + browser (runs on VPS)
 ├── deploy/             # Docker Compose & scripts
-├── shared/             # Database schema
-└── README.md
+└── shared/             # Types & schema
 ```
 
-## Requirements
+## Switching Platforms
 
-- VPS with Docker (Oracle Cloud free tier works)
-- Anthropic API key
-- Twitter account (logged in via agent browser)
+### Switch VPS (Oracle → Any)
+1. Spin up new VPS with Docker
+2. Run setup script
+3. Update `API_URL` in Vercel
+4. No code changes
+
+### Switch Dashboard Host (Vercel → Netlify/Docker)
+1. Copy `platform.standard.ts` to `platform.ts`
+2. Deploy to new platform
+3. **Only ONE file changes**
 
 ## Configuration
 
-Edit `deploy/.env`:
-
+**VPS** (`deploy/.env`):
 ```env
 ANTHROPIC_API_KEY=sk-ant-xxxxx
+CORS_ORIGIN=https://your-vercel-url.vercel.app
+```
+
+**Dashboard** (Vercel environment variables):
+```
+API_URL=http://YOUR_VPS_IP:8080
+NEXT_PUBLIC_API_URL=http://YOUR_VPS_IP:8080
 ```
 
 ## Commands
@@ -88,11 +116,14 @@ ANTHROPIC_API_KEY=sk-ant-xxxxx
 ```bash
 cd deploy
 
-# Start
+# Start VPS services
 docker compose up -d
 
 # View logs
 docker compose logs -f
+
+# View API logs only
+docker compose logs -f api
 
 # Stop
 docker compose down
@@ -101,13 +132,12 @@ docker compose down
 docker compose up -d --build
 ```
 
-## Switching VPS
+## Requirements
 
-1. Set up new VPS with Docker
-2. Clone repo and copy `.env`
-3. Run `docker compose up -d`
-
-No code changes needed.
+- VPS with Docker (Oracle Cloud free tier works)
+- Vercel account (free tier works)
+- Anthropic API key
+- Twitter account
 
 ## License
 
