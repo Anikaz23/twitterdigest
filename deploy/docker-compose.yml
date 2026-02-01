@@ -1,0 +1,35 @@
+services:
+  dashboard:
+    build:
+      context: ../dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - digest-data:/data
+    environment:
+      - DB_PATH=/data/digests.db
+    depends_on:
+      - agent
+    restart: unless-stopped
+
+  agent:
+    build:
+      context: ../agent
+      dockerfile: Dockerfile
+    volumes:
+      - digest-data:/data
+      - browser-data:/root/.openclaw/browser
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - DB_PATH=/data/digests.db
+    restart: unless-stopped
+    # Uncomment to access OpenClaw gateway from host
+    # ports:
+    #   - "18789:18789"
+
+volumes:
+  digest-data:
+    driver: local
+  browser-data:
+    driver: local
