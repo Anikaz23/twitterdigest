@@ -1,11 +1,11 @@
-import { getLatestDigest } from "@/lib/db";
+import { getLatestDigest } from "@/lib/api";
 import DigestCard from "@/components/DigestCard";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-export default function HomePage() {
-  const latestDigest = getLatestDigest();
+export default async function HomePage() {
+  const latestDigest = await getLatestDigest();
 
   return (
     <div>
