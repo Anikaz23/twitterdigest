@@ -4,7 +4,7 @@ export type TwitterMode = "bearer_token" | "oauth1a";
 export type TwitterPullMode = "home_timeline" | "user_timeline" | "search_query";
 export type SummarizerProvider = "auto" | "openai" | "anthropic";
 export type UiTheme = "x" | "twitter";
-export type DatabaseProvider = "auto" | "neon" | "supabase" | "other";
+export type DatabaseProvider = "neon" | "supabase" | "other";
 
 export interface Tweet {
   id: string;
@@ -50,7 +50,6 @@ export interface DigestListResponse {
 }
 
 export interface ConfigStatus {
-  admin_protected: boolean;
   ingestion_mode: IngestionMode;
   twitter_mode: TwitterMode;
   twitter_pull_mode: TwitterPullMode;

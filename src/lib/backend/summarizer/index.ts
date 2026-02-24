@@ -49,25 +49,6 @@ function extractJson(text: string): DigestSummary {
   };
 }
 
-function fallbackSummary(tweets: TwitterTweet[]): DigestSummary {
-  const lines = tweets
-    .slice(0, 24)
-    .map((tweet) => `${tweet.authorHandle}: ${tweet.text}`.replace(/\s+/g, " ").trim());
-  const title = tweets[0]?.authorHandle
-    ? `${tweets[0].authorHandle} and others posted new updates`
-    : "New tweet updates";
-  const paragraphs: string[] = [];
-  for (let i = 0; i < lines.length; i += 4) {
-    paragraphs.push(lines.slice(i, i + 4).join(" "));
-  }
-
-  return {
-    title,
-    summary: paragraphs.length ? paragraphs.join("\n\n") : "No new tweets to summarize.",
-    topics: ["Updates"],
-  };
-}
-
 function buildPrompt(input: {
   tweets: TwitterTweet[];
   previousSummary?: string | null;
@@ -152,11 +133,11 @@ export async function summarizeTweets(input: {
         apiKey: anthropicApiKey,
       });
     } else {
-      return fallbackSummary(input.tweets);
+      throw new Error("Unable to summarize: no summarizer API key configured.");
     }
 
     return extractJson(text);
-  } catch {
-    return fallbackSummary(input.tweets);
+  } catch (error: any) {
+    throw new Error(error?.message || "Unable to summarize.");
   }
 }
