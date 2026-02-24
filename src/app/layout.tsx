@@ -1,7 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import ThemeToggle from "@/components/theme-toggle";
-import SetupBanner from "@/components/setup-banner";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -27,30 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
-      <body>
-        <div className="app-shell">
-          <header className="topbar">
-            <div className="topbar-inner">
-              <Link href="/" className="brand-title">
-                Digest
-              </Link>
-              <nav className="nav-links">
-                <Link href="/" className="nav-link">Home</Link>
-                <Link href="/history" className="nav-link">History</Link>
-                <Link href="/settings" className="nav-link">Settings</Link>
-                <ThemeToggle />
-              </nav>
-            </div>
-          </header>
-
-          <main className="content-wrap">
-            <div className="page-stack">
-              <SetupBanner />
-              {children}
-            </div>
-          </main>
-        </div>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
