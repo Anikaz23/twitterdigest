@@ -1,0 +1,60 @@
+# Ignore everything by default.
+*
+
+# Keep directories traversable.
+!*/
+
+# Keep this ignore file and the main readme.
+!.gitignore
+!README.md
+
+# Ignore all markdown except README.
+*.md
+!README.md
+architecture.md
+
+# Environment and local secrets.
+.env
+.env.*
+.nv
+.nv.*
+
+# Common generated/build artifacts.
+node_modules/
+.next/
+dist/
+build/
+out/
+coverage/
+*.log
+*.db
+*.db-*
+
+# Keep code and essential config files.
+!package.json
+!package-lock.json
+!tsconfig.json
+!next.config.ts
+!next-env.d.ts
+!postcss.config.mjs
+!tailwind.config.ts
+!vercel.json
+
+!*.ts
+!*.tsx
+!*.js
+!*.jsx
+!*.mjs
+!*.cjs
+!*.json
+!*.css
+!*.scss
+!*.sql
+!*.yml
+!*.yaml
+!*.toml
+!*.sh
+
+# Always ignore local/workspace directories.
+.claude/
+.next/
