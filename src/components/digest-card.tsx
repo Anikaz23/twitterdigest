@@ -36,8 +36,6 @@ function avatarLabel(handle: string) {
 
 function extractEmbeddedTweets(digest: Digest): DigestTweet[] | null {
   const source =
-    digest.metadata?.demoTweets ||
-    digest.metadata?.demo_tweets ||
     digest.metadata?.tweets ||
     null;
   if (!Array.isArray(source)) return null;

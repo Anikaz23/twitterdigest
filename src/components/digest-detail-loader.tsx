@@ -4,9 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import DigestCard from "@/components/digest-card";
 import type { Digest } from "@/lib/types";
-import { getDemoDigests } from "@/lib/demo/digests";
-
-const FORCE_DEMO_MODE = true;
 
 function normalizeId(input: string): number | null {
   const parsed = Number(input);
@@ -14,25 +11,13 @@ function normalizeId(input: string): number | null {
   return parsed;
 }
 
-function findDemoDigest(id: number): Digest | null {
-  return getDemoDigests().find((digest) => digest.id === id) ?? null;
-}
-
 export default function DigestDetailLoader({ digestId }: { digestId: string }) {
   const normalizedId = useMemo(() => normalizeId(digestId), [digestId]);
-  const [digest, setDigest] = useState<Digest | null>(() => {
-    if (!normalizedId) return null;
-    return findDemoDigest(normalizedId);
-  });
+  const [digest, setDigest] = useState<Digest | null>(null);
 
   useEffect(() => {
     if (!normalizedId) {
       setDigest(null);
-      return;
-    }
-
-    if (FORCE_DEMO_MODE) {
-      setDigest(findDemoDigest(normalizedId));
       return;
     }
 

@@ -3,10 +3,8 @@
 import { useEffect, useState } from "react";
 import DigestList from "./digest-list";
 import type { Digest } from "@/lib/types";
-import { getDemoDigests } from "@/lib/demo/digests";
 
 const CACHE_KEY = "digest:history:v2";
-const FORCE_DEMO_MODE = true;
 
 interface CachedHistory { digests: Digest[]; total: number; hasMore: boolean; }
 
@@ -22,15 +20,12 @@ function writeCache(d: CachedHistory) {
 }
 
 export default function DigestListLoader() {
-  const [digests, setDigests] = useState<Digest[]>(() => getDemoDigests());
-  const [total, setTotal] = useState(() => getDemoDigests().length);
+  const [digests, setDigests] = useState<Digest[]>([]);
+  const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(false);
-  const [ready, setReady] = useState(true);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (FORCE_DEMO_MODE) return;
-
-    // Show cached data immediately
     const cached = readCache();
     if (cached) {
       setDigests(cached.digests);
@@ -52,24 +47,11 @@ export default function DigestListLoader() {
           setTotal(tot);
           setHasMore(more);
           writeCache({ digests: items, total: tot, hasMore: more });
-        } else if (!cached) {
-          const demo = getDemoDigests();
-          setDigests(demo);
-          setTotal(demo.length);
-          setHasMore(false);
         }
 
         setReady(true);
       })
-      .catch(() => {
-        if (!cached) {
-          const demo = getDemoDigests();
-          setDigests(demo);
-          setTotal(demo.length);
-          setHasMore(false);
-          setReady(true);
-        }
-      });
+      .catch(() => { setReady(true); });
   }, []);
 
   return (

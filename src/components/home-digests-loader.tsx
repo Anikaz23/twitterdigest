@@ -3,10 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import DigestCard from "@/components/digest-card";
 import type { Digest } from "@/lib/types";
-import { getDemoDigests } from "@/lib/demo/digests";
 
 const CACHE_KEY = "digest:home:v1";
-const FORCE_DEMO_MODE = true;
 
 interface CachedHomeDigests {
   digests: Digest[];
@@ -53,7 +51,7 @@ function formatMiniTime(iso: string): string {
 
 export default function HomeDigestsLoader() {
   const [mounted, setMounted] = useState(false);
-  const [digests, setDigests] = useState<Digest[]>(() => sortDigests(getDemoDigests()));
+  const [digests, setDigests] = useState<Digest[]>([]);
   const [selectedDigest, setSelectedDigest] = useState<Digest | null>(null);
   const [yesterdayRecapOpen, setYesterdayRecapOpen] = useState(false);
 
@@ -62,8 +60,6 @@ export default function HomeDigestsLoader() {
   }, []);
 
   useEffect(() => {
-    if (FORCE_DEMO_MODE) return;
-
     const cached = readCache();
     if (cached?.digests?.length) {
       setDigests(sortDigests(cached.digests));

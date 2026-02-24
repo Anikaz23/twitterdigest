@@ -4,10 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import DigestCard from "./digest-card";
 import type { Digest } from "@/lib/types";
-import { getLatestDemoDigest } from "@/lib/demo/digests";
 
 const CACHE_KEY = "digest:latest:v2";
-const FORCE_DEMO_MODE = true;
 
 function readCache(): Digest | null {
   try {
@@ -21,12 +19,9 @@ function writeCache(d: Digest) {
 }
 
 export default function LatestDigestLoader() {
-  const [digest, setDigest] = useState<Digest>(() => getLatestDemoDigest());
+  const [digest, setDigest] = useState<Digest | null>(null);
 
   useEffect(() => {
-    if (FORCE_DEMO_MODE) return;
-
-    // Show cached data immediately while fetching fresh
     const cached = readCache();
     if (cached) {
       setDigest(cached);
@@ -34,18 +29,24 @@ export default function LatestDigestLoader() {
 
     fetch("/api/digests/latest")
       .then(async (r) => {
-        if (r.status === 404) {
-          return;
-        }
-        if (!r.ok) {
-          return;
-        }
+        if (r.status === 404) return;
+        if (!r.ok) return;
         const data = await r.json() as Digest;
         setDigest(data);
         writeCache(data);
       })
       .catch(() => {});
   }, []);
+
+  if (!digest) {
+    return (
+      <div className="empty-state">
+        <div className="empty-state-icon">🐦</div>
+        <p className="empty-state-title">No digests yet</p>
+        <p className="empty-state-desc">Once ingest runs, your latest digest will appear here.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="page-stack">
