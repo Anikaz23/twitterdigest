@@ -1,0 +1,39 @@
+{
+  "name": "twitterdigest",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Single-app Twitter digest system (Next.js + Postgres)",
+  "scripts": {
+    "dev": "next dev -H 127.0.0.1 -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anikaz23/twitterdigest.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Anikaz23/twitterdigest/issues"
+  },
+  "homepage": "https://github.com/Anikaz23/twitterdigest#readme",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "next": "^15.5.12",
+    "pg": "^8.18.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "twitter-api-v2": "^1.29.0",
+    "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "@types/pg": "^8.16.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.9.3"
+  }
+}
