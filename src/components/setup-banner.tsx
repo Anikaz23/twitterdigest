@@ -66,12 +66,12 @@ export default function SetupBanner() {
 
   useEffect(() => {
     fetch("/api/config/status")
-      .then((r) => r.json())
-      .then((data: ConfigStatus) => setConfig(data))
+      .then((r) => { if (r.ok) return r.json(); })
+      .then((data: ConfigStatus | undefined) => { if (data) setConfig(data); })
       .catch(() => {});
   }, []);
 
-  if (pathname === "/settings") return null;
+  if (pathname === "/settings" || pathname === "/login") return null;
   if (!config) return null;
   if (isFullyConfigured(config)) return null;
 

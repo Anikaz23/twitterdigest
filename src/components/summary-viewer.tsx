@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const LINES_PER_PAGE = 8;
 
@@ -29,6 +29,7 @@ export default function SummaryViewer({
   createdAt: string;
   newCount: number;
 }) {
+  const [mounted, setMounted] = useState(false);
   const lines = useMemo(() => normalizeLines(summary), [summary]);
   const pages = useMemo(() => {
     const chunks: string[][] = [];
@@ -40,6 +41,10 @@ export default function SummaryViewer({
   const [pageIndex, setPageIndex] = useState(0);
   const current = pages[pageIndex] ?? [];
   const totalPages = Math.max(1, pages.length);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <section className="card summary-card">
@@ -59,7 +64,9 @@ export default function SummaryViewer({
           </span>
         </div>
         <p style={{ margin: 0, fontSize: 12, color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-          {formatDate(createdAt)} · {formatTime(createdAt)}
+          <span suppressHydrationWarning>
+            {mounted ? `${formatDate(createdAt)} · ${formatTime(createdAt)}` : ""}
+          </span>
         </p>
       </div>
 
