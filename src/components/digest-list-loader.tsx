@@ -74,14 +74,11 @@ export default function DigestListLoader() {
 
   return (
     <div className="page-stack">
-      <div>
-        <h1 className="page-title">History</h1>
-        {ready && (
-          <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--text-2)" }}>
-            {total} digest{total === 1 ? "" : "s"} total
-          </p>
-        )}
-      </div>
+      {ready && (
+        <p style={{ margin: 0, fontSize: 13, color: "var(--text-2)" }}>
+          {total} digest{total === 1 ? "" : "s"} total
+        </p>
+      )}
       {ready && <DigestList initialDigests={digests} initialHasMore={hasMore} />}
     </div>
   );

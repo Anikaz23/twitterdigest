@@ -104,6 +104,7 @@ export default function DigestCard({
   initiallyExpanded?: boolean;
 }) {
   const embeddedTweets = extractEmbeddedTweets(digest);
+  const [mounted, setMounted] = useState(false);
   const [expanded, setExpanded] = useState(initiallyExpanded);
   const [tweets, setTweets] = useState<DigestTweet[] | null>(() => embeddedTweets ?? tweetCache.get(digest.id) ?? null);
   const [loadingTweets, setLoadingTweets] = useState(false);
@@ -118,6 +119,10 @@ export default function DigestCard({
         .filter(Boolean),
     [digest.summary]
   );
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   async function loadTweets() {
     if (tweets || loadingTweets) return;
@@ -187,7 +192,9 @@ export default function DigestCard({
           <p className="digest-title">{digest.title}</p>
           <div className="digest-meta">
             <span>{digest.date}</span>
-            <span className="mono">{formatTime(digest.created_at)}</span>
+            <span className="mono" suppressHydrationWarning>
+              {mounted ? formatTime(digest.created_at) : ""}
+            </span>
           </div>
         </div>
 
@@ -225,7 +232,9 @@ export default function DigestCard({
                     <div className="tweet-avatar">{avatarLabel(tweet.authorHandle)}</div>
                     <div style={{ minWidth: 0 }}>
                       <p className="tweet-author">{tweet.authorHandle}</p>
-                      <p className="tweet-time">{formatTweetTime(tweet.timestamp)}</p>
+                      <p className="tweet-time" suppressHydrationWarning>
+                        {mounted ? formatTweetTime(tweet.timestamp) : ""}
+                      </p>
                     </div>
                   </div>
 
