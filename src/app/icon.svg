@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Black rounded square background -->
+  <rect width="32" height="32" rx="7" fill="#000"/>
+  <!-- Twitter bird, scaled down to upper portion (~14px tall, centered horizontally) -->
+  <g transform="translate(4, 2) scale(0.5)">
+    <path
+      fill="#fff"
+      d="M23.95 4.57a10.02 10.02 0 0 1-2.83.78 4.94 4.94 0 0 0 2.17-2.72 9.87 9.87 0 0 1-3.13 1.2 4.92 4.92 0 0 0-8.39 4.49A13.94 13.94 0 0 1 1.67 3.15a4.9 4.9 0 0 0 1.52 6.57 4.9 4.9 0 0 1-2.23-.62v.06a4.92 4.92 0 0 0 3.95 4.83 4.93 4.93 0 0 1-2.22.08 4.94 4.94 0 0 0 4.6 3.42A9.88 9.88 0 0 1 .96 19.53a13.9 13.9 0 0 0 7.56 2.21c9.06 0 14.01-7.5 14.01-14.01 0-.21 0-.42-.02-.63a9.96 9.96 0 0 0 2.44-2.53z"
+    />
+  </g>
+  <!-- Digest lines (3 horizontal lines, like a summary list) -->
+  <rect x="6" y="20" width="14" height="2" rx="1" fill="#fff"/>
+  <rect x="6" y="24" width="11" height="2" rx="1" fill="#fff"/>
+  <rect x="6" y="28" width="8"  height="2" rx="1" fill="#fff"/>
+</svg>
