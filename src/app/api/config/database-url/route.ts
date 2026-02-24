@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Pool } from "pg";
 import { promises as fs } from "fs";
 import path from "path";
-import { checkAdminAuth } from "@/lib/backend/auth";
+import { auth } from "@/auth";
 import { getResolvedDatabaseUrl, resetPool, setDatabaseUrlOverride } from "@/lib/backend/db/client";
 import { ensureSchema, resetSchemaCache } from "@/lib/backend/db/schema";
 import { GET as getStatus } from "@/app/api/config/status/route";
@@ -57,9 +57,9 @@ async function verifyDatabaseConnection(databaseUrl: string): Promise<void> {
 }
 
 export async function POST(req: NextRequest) {
-  const auth = checkAdminAuth(req);
-  if (!auth.ok) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const previousDatabaseUrl = getResolvedDatabaseUrl();

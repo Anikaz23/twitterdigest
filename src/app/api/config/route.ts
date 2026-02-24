@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { setSetting } from "@/lib/backend/db/repository";
+import { deleteSetting, setSetting } from "@/lib/backend/db/repository";
 import { GET as getStatus } from "@/app/api/config/status/route";
-import { checkAdminAuth } from "@/lib/backend/auth";
+import { auth } from "@/auth";
 
 const CREDENTIAL_KEYS = new Set([
   "twitter_bearer_token",
@@ -31,9 +31,9 @@ const PLAIN_KEYS = new Set([
 ]);
 
 export async function POST(req: NextRequest) {
-  const auth = checkAdminAuth(req);
-  if (!auth.ok) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -45,7 +45,10 @@ export async function POST(req: NextRequest) {
       if (typeof value !== "string") continue;
 
       if (!CREDENTIAL_KEYS.has(key) && !PLAIN_KEYS.has(key)) continue;
-      if (CREDENTIAL_KEYS.has(key) && value.trim() === "") continue;
+      if (CREDENTIAL_KEYS.has(key) && value.trim() === "") {
+        await deleteSetting(key);
+        continue;
+      }
 
       await setSetting(key, value.trim());
     }
