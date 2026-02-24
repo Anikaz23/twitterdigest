@@ -595,7 +595,6 @@ export default function SettingsForm({
   const [sourceOpen, setSourceOpen] = useState(false);
   const [twitterAuthOpen, setTwitterAuthOpen] = useState(false);
   const [twitterSummarizerOpen, setTwitterSummarizerOpen] = useState(false);
-  const [twitterCronOpen, setTwitterCronOpen] = useState(false);
   const [databaseOpen, setDatabaseOpen] = useState(false);
   const [sourceSaving, setSourceSaving] = useState(false);
   const [databaseSaving, setDatabaseSaving] = useState(false);
@@ -629,8 +628,6 @@ export default function SettingsForm({
         : "User timeline";
   const summarizerProvider =
     fields.summarizer_provider ?? status.summarizer_provider ?? "auto";
-  const cronSchedule =
-    fields.cron_schedule ?? status.cron_schedule ?? "0 */3 * * *";
   const workerAllowedIp =
     fields.worker_allowed_ip ?? status.worker_allowed_ip ?? "";
   const workerConfigured = Boolean(workerAllowedIp.trim());
@@ -710,8 +707,6 @@ export default function SettingsForm({
     Boolean((fields.openai_api_key ?? "").trim()) || c.openai_api_key;
   const hasAnthropicKey =
     Boolean((fields.anthropic_api_key ?? "").trim()) || c.anthropic_api_key;
-  const hasCronSecret =
-    Boolean((fields.cron_secret ?? "").trim()) || c.cron_secret;
   const summarizerIssue =
     (summarizerProvider === "openai" && !hasOpenAiKey) ||
     (summarizerProvider === "anthropic" && !hasAnthropicKey);
@@ -736,7 +731,6 @@ export default function SettingsForm({
     summarizerProvider === "anthropic" && !c.anthropic_api_key;
   const autoMissingBoth =
     summarizerProvider === "auto" && !c.openai_api_key && !c.anthropic_api_key;
-  const cronIssue = !hasCronSecret;
   const twitterSourceSubtitle = sourceConnected
     ? `Twitter API · Connected · ${twitterModeLabel} · ${twitterPullModeLabel}`
     : homeModeNeedsOauth
@@ -816,15 +810,12 @@ export default function SettingsForm({
         userPullMissing ||
         queryPullMissing ||
         autoMissingBoth ||
-        cronIssue ||
         (summarizerProvider === "openai" && !hasOpenAiKey) ||
         (summarizerProvider === "anthropic" && !hasAnthropicKey);
       if (hasErrors) {
         setShowValidationErrors(true);
         setSourceMsg(
-          cronIssue
-            ? "Add a Cron Secret in the Cron Scheduler section below."
-            : autoMissingBoth
+          autoMissingBoth
             ? "Add OpenAI or Anthropic key for auto summarizer."
             : "Fill in required fields.",
         );
@@ -839,7 +830,6 @@ export default function SettingsForm({
         twitter_mode: twitterMode,
         twitter_pull_mode: twitterPullMode,
         summarizer_provider: summarizerProvider,
-        cron_schedule: cronSchedule,
         worker_allowed_ip: workerAllowedIp,
         twitter_user_id: fields.twitter_user_id ?? status.twitter_user_id ?? "",
         twitter_username:
@@ -858,7 +848,6 @@ export default function SettingsForm({
         "twitter_access_token_secret",
         "openai_api_key",
         "anthropic_api_key",
-        "cron_secret",
       ] as const;
       for (const k of credKeys) {
         if (Object.prototype.hasOwnProperty.call(fields, k)) {
@@ -890,7 +879,6 @@ export default function SettingsForm({
           "twitter_mode",
           "twitter_pull_mode",
           "summarizer_provider",
-          "cron_schedule",
           "worker_allowed_ip",
         ])
           delete next[k];
@@ -900,7 +888,6 @@ export default function SettingsForm({
       setSourceOpen(false);
       setTwitterAuthOpen(false);
       setTwitterSummarizerOpen(false);
-      setTwitterCronOpen(false);
     } catch (e: any) {
       setSourceMsg(e?.message || "Error.");
     } finally {
@@ -1000,7 +987,6 @@ export default function SettingsForm({
             if (next) {
               setTwitterAuthOpen(false);
               setTwitterSummarizerOpen(false);
-              setTwitterCronOpen(false);
             }
             return next;
           })
@@ -1673,132 +1659,6 @@ export default function SettingsForm({
               )}
             </SubSection>
 
-            <SubSection
-              title="Cron Scheduler"
-              subtitle="Secure trigger for scheduled digest runs"
-              open={twitterCronOpen}
-              onToggle={() => setTwitterCronOpen((v) => !v)}
-              pill={
-                <StatusPill
-                  on={!cronIssue}
-                  label={!cronIssue ? "Configured" : "Missing"}
-                  tone={!cronIssue ? "success" : "warning"}
-                />
-              }
-            >
-              {cronIssue && (
-                <SetupHint
-                  title="Cron secret required"
-                  description="Add a cron secret, then use any free scheduler to call /api/cron/digest with that secret."
-                  linkHref="https://developers.cloudflare.com/workers/configuration/cron-triggers/"
-                  linkLabel="Cloudflare Cron Triggers (free tier)"
-                />
-              )}
-
-              <SecretField
-                label="Cron Secret"
-                name="cron_secret"
-                value={fields.cron_secret ?? ""}
-                isSaved={c.cron_secret}
-                onChange={(v) => set("cron_secret", v)}
-                invalid={showValidationErrors && cronIssue}
-                locked={locked}
-                onUnlockRequest={onUnlockRequest}
-              />
-
-              <label className="settings-label">
-                Cron schedule (crontab)
-                <input
-                  className="field"
-                  value={cronSchedule}
-                  onChange={(e) => set("cron_schedule", e.target.value)}
-                  placeholder="0 */3 * * *"
-                />
-              </label>
-
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: 12,
-                  color: "var(--text-2)",
-                  lineHeight: 1.5,
-                }}
-              >
-                Cron endpoint is fixed internally. Send either{" "}
-                <code>Authorization: Bearer &lt;cron_secret&gt;</code> or{" "}
-                <code>x-cron-secret: &lt;cron_secret&gt;</code> when your
-                scheduler triggers the job.
-              </p>
-
-              <div className="card card-soft" style={{ marginTop: 10 }}>
-                <p
-                  style={{
-                    margin: "0 0 8px",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: "var(--text)",
-                  }}
-                >
-                  Free scheduler options
-                </p>
-                <ul
-                  style={{
-                    margin: 0,
-                    paddingLeft: 18,
-                    display: "grid",
-                    gap: 6,
-                    color: "var(--text-2)",
-                    fontSize: 12,
-                  }}
-                >
-                  <li>
-                    <a
-                      href="https://developers.cloudflare.com/workers/configuration/cron-triggers/"
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{
-                        color: "var(--accent)",
-                        fontWeight: 600,
-                        textDecoration: "underline",
-                      }}
-                    >
-                      Cloudflare Workers Cron Triggers
-                    </a>{" "}
-                    (free tier available)
-                  </li>
-                  <li>
-                    <a
-                      href="https://docs.github.com/actions/using-workflows/events-that-trigger-workflows#schedule"
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{
-                        color: "var(--accent)",
-                        fontWeight: 600,
-                        textDecoration: "underline",
-                      }}
-                    >
-                      GitHub Actions schedule
-                    </a>{" "}
-                    (free usage on public repos; limited minutes on private)
-                  </li>
-                  <li>
-                    <a
-                      href="https://cron-job.org/en/"
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{
-                        color: "var(--accent)",
-                        fontWeight: 600,
-                        textDecoration: "underline",
-                      }}
-                    >
-                      cron-job.org
-                    </a>{" "}
-                    (free HTTP cron pings)
-                  </li>
-                </ul>
-              </div>
-            </SubSection>
           </>
         )}
 

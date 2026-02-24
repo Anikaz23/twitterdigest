@@ -11,7 +11,6 @@ const CREDENTIAL_KEYS = [
   "twitter_access_token_secret",
   "openai_api_key",
   "anthropic_api_key",
-  "cron_secret",
   "database_url",
 ] as const;
 
