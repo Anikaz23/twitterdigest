@@ -816,12 +816,15 @@ export default function SettingsForm({
         userPullMissing ||
         queryPullMissing ||
         autoMissingBoth ||
+        cronIssue ||
         (summarizerProvider === "openai" && !hasOpenAiKey) ||
         (summarizerProvider === "anthropic" && !hasAnthropicKey);
       if (hasErrors) {
         setShowValidationErrors(true);
         setSourceMsg(
-          autoMissingBoth
+          cronIssue
+            ? "Add a Cron Secret in the Cron Scheduler section below."
+            : autoMissingBoth
             ? "Add OpenAI or Anthropic key for auto summarizer."
             : "Fill in required fields.",
         );

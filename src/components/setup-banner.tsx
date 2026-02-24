@@ -33,10 +33,12 @@ function getSetupItems(c: ConfigStatus): SetupItem[] {
       ? "Waiting for first digest from OpenClaw"
       : "Connected";
   } else {
-    hasSource = !!hasTwitter;
-    sourceDetail = hasSource
-      ? "Configured"
-      : "Add a Bearer Token or OAuth 1.0a keys in Settings";
+    hasSource = !!hasTwitter && c.configured.cron_secret;
+    sourceDetail = !hasTwitter
+      ? "Add a Bearer Token or OAuth 1.0a keys in Settings"
+      : !c.configured.cron_secret
+      ? "Add a Cron Secret in Settings → Cron Scheduler"
+      : "Configured";
   }
 
   return [
