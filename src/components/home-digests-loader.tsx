@@ -52,9 +52,14 @@ function formatMiniTime(iso: string): string {
 }
 
 export default function HomeDigestsLoader() {
+  const [mounted, setMounted] = useState(false);
   const [digests, setDigests] = useState<Digest[]>(() => sortDigests(getDemoDigests()));
   const [selectedDigest, setSelectedDigest] = useState<Digest | null>(null);
   const [yesterdayRecapOpen, setYesterdayRecapOpen] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (FORCE_DEMO_MODE) return;
@@ -164,7 +169,7 @@ export default function HomeDigestsLoader() {
                 >
                   <p className="digest-mini-title">{digest.title}</p>
                   <div className="digest-mini-meta">
-                    <span>{formatMiniTime(digest.created_at)}</span>
+                    <span suppressHydrationWarning>{mounted ? formatMiniTime(digest.created_at) : ""}</span>
                     <span>{newCount}</span>
                   </div>
                 </button>

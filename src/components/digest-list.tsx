@@ -86,6 +86,30 @@ function formatSearchDate(digest: Digest): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
+function dayStart(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function dayKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function groupLabel(date: Date, now: Date): string {
+  const today = dayStart(now).getTime();
+  const target = dayStart(date).getTime();
+  const diff = Math.round((today - target) / 86_400_000);
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Yesterday";
+  return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
+
+interface HistoryGroup {
+  key: string;
+  label: string;
+  sortKey: number;
+  digests: Digest[];
+}
+
 export default function DigestList({
   initialDigests,
   initialHasMore,
@@ -105,6 +129,53 @@ export default function DigestList({
     () => digests.filter((digest) => matchesDigestSearch(digest, query)),
     [digests, query]
   );
+  const groupedDigests = useMemo(() => {
+    const byDay = new Map<string, HistoryGroup>();
+    const now = new Date();
+    const sorted = [...filteredDigests].sort((a, b) => {
+      const left = parseDigestDate(a);
+      const right = parseDigestDate(b);
+      const leftTime = left ? left.getTime() : 0;
+      const rightTime = right ? right.getTime() : 0;
+      return rightTime - leftTime;
+    });
+
+    for (const digest of sorted) {
+      const parsed = parseDigestDate(digest);
+      if (!parsed) {
+        const unknown = byDay.get("unknown");
+        if (unknown) {
+          unknown.digests.push(digest);
+        } else {
+          byDay.set("unknown", {
+            key: "unknown",
+            label: "Unknown Date",
+            sortKey: -1,
+            digests: [digest],
+          });
+        }
+        continue;
+      }
+
+      const start = dayStart(parsed);
+      const key = dayKey(start);
+      const existing = byDay.get(key);
+
+      if (existing) {
+        existing.digests.push(digest);
+        continue;
+      }
+
+      byDay.set(key, {
+        key,
+        label: groupLabel(start, now),
+        sortKey: start.getTime(),
+        digests: [digest],
+      });
+    }
+
+    return [...byDay.values()].sort((a, b) => b.sortKey - a.sortKey);
+  }, [filteredDigests]);
   const dropdownMatches = useMemo(() => {
     if (!draftQuery.trim()) return [];
     return digests.filter((digest) => matchesDigestSearch(digest, draftQuery)).slice(0, 6);
@@ -191,9 +262,16 @@ export default function DigestList({
         )}
       </form>
 
-      {filteredDigests.length > 0 ? (
-        filteredDigests.map((digest) => (
-          <DigestCard key={digest.id} digest={digest} />
+      {groupedDigests.length > 0 ? (
+        groupedDigests.map((group) => (
+          <section key={group.key} className="history-group">
+            <h3 className="history-group-title">{group.label}</h3>
+            <div className="history-group-list">
+              {group.digests.map((digest) => (
+                <DigestCard key={digest.id} digest={digest} />
+              ))}
+            </div>
+          </section>
         ))
       ) : (
         <div className="card card-soft">
