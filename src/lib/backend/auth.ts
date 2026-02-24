@@ -42,17 +42,6 @@ export async function checkCronAuth(req: NextRequest): Promise<{ ok: boolean; st
   return { ok: true, status: 200 };
 }
 
-export function checkAdminAuth(req: NextRequest): { ok: boolean; status: number; error?: string } {
-  const secret = process.env.ADMIN_SECRET?.trim();
-  if (!secret) {
-    return { ok: false, status: 503, error: "ADMIN_SECRET is not configured." };
-  }
-  const provided = readBearerToken(req) || req.headers.get("x-admin-secret")?.trim() || "";
-  if (!provided || !timingSafeMatch(secret, provided)) {
-    return { ok: false, status: 401, error: "Unauthorized." };
-  }
-  return { ok: true, status: 200 };
-}
 
 export async function checkWorkerAuth(req: NextRequest): Promise<{ ok: boolean; status: number; error?: string }> {
   const token = process.env.WORKER_API_TOKEN?.trim() || "";

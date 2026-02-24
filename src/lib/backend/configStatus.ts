@@ -52,8 +52,15 @@ function inferDatabaseProvider(host: string): DatabaseProvider {
   const normalized = host.toLowerCase();
   if (normalized.includes("neon.tech")) return "neon";
   if (normalized.includes("supabase.co")) return "supabase";
-  if (!normalized) return "auto";
   return "other";
+}
+
+function normalizeDatabaseProvider(value: string | null, fallback: DatabaseProvider): DatabaseProvider {
+  // Host inference is ground truth — if the host identifies a specific provider, trust it unconditionally.
+  if (fallback !== "other") return fallback;
+  // For unrecognised hosts, use the stored explicit choice.
+  if (value === "neon" || value === "supabase" || value === "other") return value;
+  return fallback;
 }
 
 function normalizeTheme(value: string | null): UiTheme {
@@ -84,15 +91,15 @@ function normalizePullMode(input: {
 
 export function defaultConfigStatus(options?: { databaseConnected?: boolean }): ConfigStatus {
   const databaseUrl = getResolvedDatabaseUrl();
+  const inferredProvider = inferDatabaseProvider(parseDatabaseHost(databaseUrl));
   return {
-    admin_protected: false,
     ingestion_mode: "twitter_api",
     twitter_mode: "bearer_token",
     twitter_pull_mode: "user_timeline",
     summarizer_provider: "auto",
     cron_schedule: process.env.CRON_SCHEDULE || "0 */3 * * *",
     ui_theme: "x",
-    database_provider: "auto",
+    database_provider: inferredProvider,
     database_label: "",
     database_connected: options?.databaseConnected ?? false,
     database_host: parseDatabaseHost(databaseUrl),
@@ -135,7 +142,6 @@ export async function buildConfigStatus(): Promise<ConfigStatus> {
   const workerFirstDigestReceived = workerDigestFlag ? true : await hasWorkerDigest();
 
   return {
-    admin_protected: false,
     ingestion_mode: nonEmptyOrDefault(
       read("ingestion_mode", process.env.INGESTION_MODE),
       "twitter_api"
@@ -148,7 +154,7 @@ export async function buildConfigStatus(): Promise<ConfigStatus> {
     ) as SummarizerProvider,
     cron_schedule: nonEmptyOrDefault(read("cron_schedule", process.env.CRON_SCHEDULE), "0 */3 * * *"),
     ui_theme: normalizeTheme(read("ui_theme", process.env.UI_THEME)),
-    database_provider: nonEmptyOrDefault(read("database_provider"), inferredProvider) as DatabaseProvider,
+    database_provider: normalizeDatabaseProvider(read("database_provider"), inferredProvider),
     database_label: read("database_label", process.env.DATABASE_LABEL) ?? "",
     database_connected: true,
     database_host: databaseHost,
