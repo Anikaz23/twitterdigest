@@ -64,11 +64,11 @@ function buildPrompt(input: {
   }));
 
   return `
-Write a digest for these new tweets.
+Write a digest for these tweets.
 Return JSON with keys: title, summary, topics.
-Title must be one line. Summary must keep all important details and use appropriate length.
-Make the summary reasonably detailed and avoid ultra-short output.
-Focus only on new information.
+Title must be one line. Summary must cover every single tweet — do not skip or omit any tweet.
+You may group similar tweets together in the same paragraph, but all tweets must be represented.
+Include key information word for word and do not miss anything.
 Tweets: ${JSON.stringify(payload)}
 `.trim();
 }
