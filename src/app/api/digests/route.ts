@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDigests, getTotalDigestCount } from "@/lib/backend/db/repository";
-import { seedDemoDigestsIfEmpty } from "@/lib/backend/demo/seed";
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,14 +9,7 @@ export async function GET(req: NextRequest) {
     const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 1), 100) : 20;
     const offset = Number.isFinite(offsetRaw) ? Math.max(offsetRaw, 0) : 0;
 
-    let [digests, total] = await Promise.all([getDigests(limit, offset), getTotalDigestCount()]);
-
-    if (total === 0) {
-      const inserted = await seedDemoDigestsIfEmpty();
-      if (inserted) {
-        [digests, total] = await Promise.all([getDigests(limit, offset), getTotalDigestCount()]);
-      }
-    }
+    const [digests, total] = await Promise.all([getDigests(limit, offset), getTotalDigestCount()]);
 
     return NextResponse.json({
       digests,

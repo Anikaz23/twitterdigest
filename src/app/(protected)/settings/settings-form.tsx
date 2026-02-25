@@ -571,7 +571,7 @@ export default function SettingsForm({
   }
   const [fields, setFields] = useState<Record<string, string>>({});
 
-  // When credentials are revealed, seed the fields state with actual values
+  // When credentials are revealed, populate fields state with actual values
   useEffect(() => {
     if (revealedValues) {
       const extra: Record<string, string> = {};
