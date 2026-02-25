@@ -1,4 +1,4 @@
-const DEFAULT_MODEL = "claude-haiku-4-5-20251001";
+const DEFAULT_MODEL = "claude-haiku-4-5";
 
 export async function summarizeWithAnthropic(input: {
   systemPrompt: string;
