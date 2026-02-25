@@ -258,11 +258,18 @@ button { font-family: var(--font-sans); }
 
 .digest-meta {
   display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: baseline;
+  flex-wrap: nowrap;
   gap: 8px;
   font-size: 11px;
+  line-height: 1;
   color: var(--text-3);
+}
+
+.digest-meta span {
+  font-size: 11px;
+  line-height: 1;
+  font-family: inherit;
 }
 
 .digest-chevron {
