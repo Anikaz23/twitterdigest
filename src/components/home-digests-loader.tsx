@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import DigestCard from "@/components/digest-card";
 import type { Digest } from "@/lib/types";
 
-const CACHE_KEY = "digest:home:v1";
+const CACHE_KEY = "digest:home:v2";
 
 interface CachedHomeDigests {
   digests: Digest[];
