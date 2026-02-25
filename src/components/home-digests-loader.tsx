@@ -101,7 +101,7 @@ export default function HomeDigestsLoader() {
     };
   }, [anyOverlayOpen]);
 
-  const { latestDigest, todayDigests, yesterdayDigests, yesterdayRecapParagraphs } = useMemo(() => {
+  const { latestDigest, todayDigests, todayTotal, yesterdayDigests, yesterdayRecapParagraphs } = useMemo(() => {
     const sorted = sortDigests(digests);
     const latest = sorted[0] ?? null;
     const today = dayKey(0);
@@ -118,9 +118,12 @@ export default function HomeDigestsLoader() {
           .filter(Boolean)
       );
 
+    const todayTotal = sorted.filter((d) => d.date === today).length;
+
     return {
       latestDigest: latest,
       todayDigests: todays,
+      todayTotal,
       yesterdayDigests: yesterdays,
       yesterdayRecapParagraphs: recapParagraphs,
     };
