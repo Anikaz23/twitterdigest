@@ -119,6 +119,19 @@ export async function getTotalDigestCount(): Promise<number> {
   return Number(rows[0]?.count ?? 0);
 }
 
+export async function insertCronLog(params: {
+  status: "digest_created" | "no_new_data" | "skipped" | "error";
+  digestId?: number | null;
+  message?: string | null;
+}): Promise<void> {
+  await ensureSchema();
+  const pool = getPool();
+  await pool.query(
+    `INSERT INTO cron_logs (status, digest_id, message) VALUES ($1, $2, $3)`,
+    [params.status, params.digestId ?? null, params.message ?? null]
+  );
+}
+
 export async function hasWorkerDigest(): Promise<boolean> {
   await ensureSchema();
   const pool = getPool();

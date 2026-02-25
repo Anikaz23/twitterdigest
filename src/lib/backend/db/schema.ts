@@ -80,6 +80,21 @@ async function runMigrations() {
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS cron_logs (
+        id SERIAL PRIMARY KEY,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        status TEXT NOT NULL CHECK(status IN ('digest_created', 'no_new_data', 'skipped', 'error')),
+        digest_id INTEGER REFERENCES digests(id) ON DELETE SET NULL,
+        message TEXT
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_cron_logs_created_at
+      ON cron_logs(created_at DESC);
+    `);
   } finally {
     client.release();
   }

@@ -85,24 +85,31 @@ export async function runTwitterDigestNow() {
   });
 
   const batch = await analyzeTweetBatch(tweets);
+
+  if (batch.newTweets.length === 0) {
+    return {
+      skipped: true,
+      reason: "no_new_data",
+      counts: {
+        fetched: batch.fetchedTweets.length,
+        unique: batch.uniqueTweets.length,
+        new: 0,
+        seen: batch.seenTweets.length,
+      },
+    };
+  }
+
   const previous = await getLatestDigest();
 
-  const summary =
-    batch.newTweets.length === 0
-      ? {
-          title: "No new updates",
-          summary: `No new tweets since last digest. ${batch.uniqueTweets.length} fetched, 0 new.`,
-          topics: ["No Updates"],
-        }
-      : await summarizeTweets({
-          tweets: batch.newTweets,
-          previousSummary: previous?.summary ?? null,
-          fetchedCount: batch.uniqueTweets.length,
-          newCount: batch.newTweets.length,
-          provider: summarizerProvider,
-          openaiApiKey,
-          anthropicApiKey,
-        });
+  const summary = await summarizeTweets({
+    tweets: batch.newTweets,
+    previousSummary: previous?.summary ?? null,
+    fetchedCount: batch.uniqueTweets.length,
+    newCount: batch.newTweets.length,
+    provider: summarizerProvider,
+    openaiApiKey,
+    anthropicApiKey,
+  });
 
   const saved = await persistDigestFromBatch({
     batch,
