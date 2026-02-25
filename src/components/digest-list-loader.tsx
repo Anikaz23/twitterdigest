@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import DigestList from "./digest-list";
 import type { Digest } from "@/lib/types";
 
-const CACHE_KEY = "digest:history:v2";
+const CACHE_KEY = "digest:history:v3";
 
 interface CachedHistory { digests: Digest[]; total: number; hasMore: boolean; }
 
@@ -61,7 +61,7 @@ export default function DigestListLoader() {
           {total} digest{total === 1 ? "" : "s"} total
         </p>
       )}
-      <DigestList initialDigests={digests} initialHasMore={hasMore} />
+      <DigestList key={ready && digests.length > 0 ? "loaded" : "empty"} initialDigests={digests} initialHasMore={hasMore} />
     </div>
   );
 }
