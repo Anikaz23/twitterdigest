@@ -14,6 +14,12 @@ const CREDENTIAL_KEYS = [
   "database_url",
 ] as const;
 
+function maskSecret(value: string): string {
+  if (!value) return "";
+  if (value.length <= 8) return "••••••••";
+  return value.slice(0, 4) + "••••••••" + value.slice(-4);
+}
+
 function timingSafeMatch(expected: string, actual: string): boolean {
   const a = Buffer.from(expected);
   const b = Buffer.from(actual);
@@ -38,12 +44,10 @@ export async function POST(req: NextRequest) {
   const settings = await getSettings([...CREDENTIAL_KEYS]);
   const values: Record<string, string> = {};
   for (const key of CREDENTIAL_KEYS) {
-    // database_url lives in env (written by database-url route), not the DB settings table
-    if (key === "database_url") {
-      values[key] = settings[key] ?? process.env.DATABASE_URL ?? "";
-    } else {
-      values[key] = settings[key] ?? "";
-    }
+    const raw = key === "database_url"
+      ? (settings[key] ?? process.env.DATABASE_URL ?? "")
+      : (settings[key] ?? "");
+    values[key] = maskSecret(raw);
   }
 
   return NextResponse.json(values);
