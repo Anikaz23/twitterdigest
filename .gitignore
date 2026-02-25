@@ -55,6 +55,12 @@ coverage/
 !*.yaml
 !*.toml
 !*.sh
+!*.png
+!*.jpg
+!*.jpeg
+!*.gif
+!*.webp
+!*.ico
 
 # Always ignore local/workspace directories.
 .claude/
