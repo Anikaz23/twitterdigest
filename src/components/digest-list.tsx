@@ -210,10 +210,10 @@ export default function DigestList({
 
   if (!digests.length) {
     return (
-      <div className="card card-soft">
-        <p className="muted" style={{ margin: 0 }}>
-          No digests yet.
-        </p>
+      <div className="empty-state">
+        <div className="empty-state-icon">📋</div>
+        <p className="empty-state-title">No history yet</p>
+        <p className="empty-state-desc">Past digests will appear here once ingest has run.</p>
       </div>
     );
   }

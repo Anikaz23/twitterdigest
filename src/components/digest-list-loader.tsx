@@ -61,7 +61,7 @@ export default function DigestListLoader() {
           {total} digest{total === 1 ? "" : "s"} total
         </p>
       )}
-      {ready && <DigestList initialDigests={digests} initialHasMore={hasMore} />}
+      <DigestList initialDigests={digests} initialHasMore={hasMore} />
     </div>
   );
 }
