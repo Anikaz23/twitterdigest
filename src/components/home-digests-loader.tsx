@@ -52,6 +52,7 @@ function formatMiniTime(iso: string): string {
 export default function HomeDigestsLoader() {
   const [mounted, setMounted] = useState(false);
   const [digests, setDigests] = useState<Digest[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedDigest, setSelectedDigest] = useState<Digest | null>(null);
   const [yesterdayRecapOpen, setYesterdayRecapOpen] = useState(false);
 
@@ -67,15 +68,32 @@ export default function HomeDigestsLoader() {
 
     fetch("/api/digests?limit=64&offset=0")
       .then(async (res) => {
-        if (!res.ok) return;
+        if (!res.ok) {
+          let message = "Failed to load digests.";
+          try {
+            const payload = await res.json();
+            if (payload?.error && typeof payload.error === "string") {
+              message = payload.error;
+            }
+          } catch {}
+          setLoadError(message);
+          return;
+        }
         const payload = await res.json();
         const items = Array.isArray(payload?.digests) ? (payload.digests as Digest[]) : [];
-        if (!items.length) return;
+        if (!items.length) {
+          setDigests([]);
+          setLoadError(null);
+          return;
+        }
         const sorted = sortDigests(items);
         setDigests(sorted);
+        setLoadError(null);
         writeCache({ digests: sorted });
       })
-      .catch(() => {});
+      .catch(() => {
+        setLoadError("Failed to load digests.");
+      });
   }, []);
 
   const anyOverlayOpen = Boolean(selectedDigest) || yesterdayRecapOpen;
@@ -132,6 +150,14 @@ export default function HomeDigestsLoader() {
   if (!latestDigest) {
     return (
       <div className="empty-state">
+        {loadError && (
+          <div className="card" style={{ marginBottom: 12, maxWidth: 680, textAlign: "left" }}>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "var(--danger)" }}>
+              Couldn&apos;t load digests
+            </p>
+            <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--text-2)" }}>{loadError}</p>
+          </div>
+        )}
         <div className="empty-state-icon">🐦</div>
         <p className="empty-state-title">No digests yet</p>
         <p className="empty-state-desc">Once ingest runs, your latest digest will appear here.</p>
