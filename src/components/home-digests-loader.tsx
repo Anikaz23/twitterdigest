@@ -151,7 +151,7 @@ export default function HomeDigestsLoader() {
       <section className="home-section">
         <div className="home-section-head">
           <h2 className="section-title">Today's Digests</h2>
-          <p className="home-section-meta">{todayDigests.length} digest{todayDigests.length === 1 ? "" : "s"}</p>
+          <p className="home-section-meta">{todayTotal} digest{todayTotal === 1 ? "" : "s"}</p>
         </div>
         {todayDigests.length ? (
           <div className="digest-rail">
