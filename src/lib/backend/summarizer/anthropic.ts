@@ -1,4 +1,4 @@
-const DEFAULT_MODEL = "claude-3-5-sonnet-latest";
+const DEFAULT_MODEL = "claude-haiku-4-5-20251001";
 
 export async function summarizeWithAnthropic(input: {
   systemPrompt: string;
@@ -13,7 +13,7 @@ export async function summarizeWithAnthropic(input: {
     throw new Error("ANTHROPIC_API_KEY is required.");
   }
 
-  const model = input.model || process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
+  const model = DEFAULT_MODEL;
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {

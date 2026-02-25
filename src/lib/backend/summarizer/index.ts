@@ -9,6 +9,7 @@ Keys: "title", "summary", "topics".
 "title" is one line.
 "summary" is a detailed digest with appropriate length, covering all important new information.
 Use multiple paragraphs and preserve concrete details from tweets.
+Keep the total JSON response under 1800 tokens so it is never cut off.
 `.trim();
 
 export interface DigestSummary {
@@ -90,7 +91,7 @@ export async function summarizeTweets(input: {
     process.env.SUMMARY_MAX_TOKENS ||
     process.env.OPENAI_MAX_TOKENS ||
     process.env.ANTHROPIC_MAX_TOKENS ||
-    "700";
+    "2000";
   const maxTokens = Number.isFinite(Number(maxTokensRaw)) ? Number(maxTokensRaw) : 700;
 
   const provider = (input.provider || process.env.SUMMARIZER_PROVIDER || "auto").toLowerCase();

@@ -1,4 +1,5 @@
-const DEFAULT_MODEL = "gpt-4o-mini";
+const DEFAULT_MODEL = "gpt-5-mini";
+const REASONING_MODELS = new Set(["gpt-5-mini", "gpt-5", "o1", "o1-mini", "o3", "o3-mini"]);
 
 export async function summarizeWithOpenAI(input: {
   systemPrompt: string;
@@ -14,11 +15,28 @@ export async function summarizeWithOpenAI(input: {
     throw new Error("OPENAI_API_KEY is required.");
   }
 
-  const model = input.model || process.env.OPENAI_MODEL || DEFAULT_MODEL;
+  const model = DEFAULT_MODEL;
   const baseUrl = (input.baseUrl || process.env.OPENAI_BASE_URL || "https://api.openai.com/v1").replace(
     /\/+$/,
     ""
   );
+
+  const isReasoning = REASONING_MODELS.has(model);
+
+  const body: Record<string, unknown> = {
+    model,
+    max_completion_tokens: input.maxTokens,
+    messages: [
+      { role: "system", content: input.systemPrompt },
+      { role: "user", content: input.userPrompt },
+    ],
+  };
+
+  if (isReasoning) {
+    body.reasoning_effort = "minimal";
+  } else {
+    body.temperature = input.temperature;
+  }
 
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
@@ -26,15 +44,7 @@ export async function summarizeWithOpenAI(input: {
       "content-type": "application/json",
       authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({
-      model,
-      temperature: input.temperature,
-      max_tokens: input.maxTokens,
-      messages: [
-        { role: "system", content: input.systemPrompt },
-        { role: "user", content: input.userPrompt },
-      ],
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
