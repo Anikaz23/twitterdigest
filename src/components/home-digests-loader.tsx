@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import DigestCard from "@/components/digest-card";
 import type { Digest } from "@/lib/types";
 
-const CACHE_KEY = "digest:home:v2";
+const CACHE_KEY = "digest:home:v4";
 
 interface CachedHomeDigests {
   digests: Digest[];
@@ -84,6 +84,7 @@ export default function HomeDigestsLoader() {
         if (!items.length) {
           setDigests([]);
           setLoadError(null);
+          writeCache({ digests: [] });
           return;
         }
         const sorted = sortDigests(items);

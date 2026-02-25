@@ -2,6 +2,11 @@
 
 One Next.js app on Vercel, no separate server required.
 
+## Screenshots
+![Twitter Digest Screenshot 1](public/td1.png)
+![Twitter Digest Screenshot 2](public/td2.png)
+![Twitter Digest Screenshot 3](public/td3.png)
+
 ## What It Does
 - Default ingestion via Twitter/X API.
 - Dedup by tweet ID (in-batch + against DB).

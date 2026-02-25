@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import DigestList from "./digest-list";
 import type { Digest } from "@/lib/types";
 
-const CACHE_KEY = "digest:history:v3";
+const CACHE_KEY = "digest:history:v4";
 
 interface CachedHistory { digests: Digest[]; total: number; hasMore: boolean; }
 
@@ -42,12 +42,19 @@ export default function DigestListLoader() {
         const tot: number = data.pagination?.total ?? 0;
         const more: boolean = data.pagination?.hasMore ?? false;
 
-        if (items.length) {
-          setDigests(items);
+        if (!items.length) {
+          setDigests([]);
           setTotal(tot);
-          setHasMore(more);
-          writeCache({ digests: items, total: tot, hasMore: more });
+          setHasMore(false);
+          writeCache({ digests: [], total: tot, hasMore: false });
+          setReady(true);
+          return;
         }
+
+        setDigests(items);
+        setTotal(tot);
+        setHasMore(more);
+        writeCache({ digests: items, total: tot, hasMore: more });
 
         setReady(true);
       })
