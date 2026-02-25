@@ -7,7 +7,8 @@
     "dev": "next dev -H 127.0.0.1 -p 3000",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "seed:demo": "node scripts/seed-demo.mjs"
   },
   "repository": {
     "type": "git",
