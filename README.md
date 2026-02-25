@@ -11,7 +11,6 @@ It provides live digest views, history browsing, and API endpoints for ingestion
 
 ## Pics
 ![Twitter Digest Screenshot 1](public/td1.png)
-![Twitter Digest Screenshot 2](public/td2.png)
 ![Twitter Digest Screenshot 3](public/td3.png)
 
 ## Tech Stack
