@@ -40,6 +40,7 @@ function toDigest(row: any): Digest {
     idempotency_key: row.idempotency_key ?? null,
     worker_run_id: row.worker_run_id ?? null,
     metadata,
+    latest_tweet_id: row.latest_tweet_id ?? null,
   };
 }
 
@@ -152,12 +153,13 @@ export async function saveDigest(params: {
   idempotencyKey?: string | null;
   workerRunId?: string | null;
   metadata?: Record<string, unknown> | null;
+  latestTweetId?: string | null;
 }): Promise<number> {
   await ensureSchema();
   const pool = getPool();
   const { rows } = await pool.query(
-    `INSERT INTO digests (summary, topics, status, source, idempotency_key, worker_run_id, metadata)
-     VALUES ($1, $2::jsonb, $3, $4, $5, $6, $7::jsonb)
+    `INSERT INTO digests (summary, topics, status, source, idempotency_key, worker_run_id, metadata, latest_tweet_id)
+     VALUES ($1, $2::jsonb, $3, $4, $5, $6, $7::jsonb, $8)
      RETURNING id`,
     [
       params.summary,
@@ -167,6 +169,7 @@ export async function saveDigest(params: {
       params.idempotencyKey ?? null,
       params.workerRunId ?? null,
       JSON.stringify(params.metadata ?? {}),
+      params.latestTweetId ?? null,
     ]
   );
   return Number(rows[0].id);

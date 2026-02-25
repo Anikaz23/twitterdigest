@@ -30,6 +30,7 @@ export interface Digest {
   source: string | null;
   idempotency_key: string | null;
   worker_run_id: string | null;
+  latest_tweet_id: string | null;
   metadata: {
     fetchedCount?: number;
     uniqueCount?: number;

@@ -20,6 +20,7 @@ export interface TwitterConfig {
   username?: string;
   query?: string;
   maxResults: number;
+  sinceId?: string;
 }
 
 function buildClient(config: TwitterConfig): TwitterApi {
@@ -88,8 +89,10 @@ function tweetFields() {
 
 export async function fetchTweets(config: TwitterConfig): Promise<TwitterTweet[]> {
   const client = buildClient(config);
-  const maxResults = Math.max(10, Math.min(100, config.maxResults || 50));
+  const maxResults = Math.max(10, Math.min(200, config.maxResults || 50));
   const fields = tweetFields();
+
+  const sinceId = config.sinceId || undefined;
 
   if (config.pullMode === "search_query") {
     if (!config.query?.trim()) {
@@ -99,6 +102,7 @@ export async function fetchTweets(config: TwitterConfig): Promise<TwitterTweet[]
       ...fields,
       max_results: maxResults,
       sort_order: "recency",
+      ...(sinceId ? { since_id: sinceId } : {}),
     });
     return mapTweets(response.data.data, response.data.includes);
   }
@@ -110,6 +114,7 @@ export async function fetchTweets(config: TwitterConfig): Promise<TwitterTweet[]
     const response = await client.v2.homeTimeline({
       ...fields,
       max_results: maxResults,
+      ...(sinceId ? { since_id: sinceId } : {}),
     });
     return mapTweets(response.data.data, response.data.includes);
   }
@@ -118,6 +123,7 @@ export async function fetchTweets(config: TwitterConfig): Promise<TwitterTweet[]
   const response = await client.v2.userTimeline(userId, {
     ...fields,
     max_results: maxResults,
+    ...(sinceId ? { since_id: sinceId } : {}),
   });
   return mapTweets(response.data.data, response.data.includes);
 }

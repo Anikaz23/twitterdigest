@@ -69,6 +69,8 @@ export async function runTwitterDigestNow() {
     throw new Error("Search query mode requires twitter_query.");
   }
 
+  const previous = await getLatestDigest();
+
   const tweets = await fetchTweets({
     mode: twitterMode,
     pullMode: twitterPullMode,
@@ -82,6 +84,7 @@ export async function runTwitterDigestNow() {
     username: twitterUsername || undefined,
     query: twitterQuery || undefined,
     maxResults: numberOrDefault(read("twitter_max_results", process.env.TWITTER_MAX_RESULTS), 50),
+    sinceId: previous?.latest_tweet_id ?? undefined,
   });
 
   const batch = await analyzeTweetBatch(tweets);
@@ -99,7 +102,10 @@ export async function runTwitterDigestNow() {
     };
   }
 
-  const previous = await getLatestDigest();
+  const latestTweetId = batch.fetchedTweets.reduce<string | null>((max, t) => {
+    if (!max) return t.id;
+    return BigInt(t.id) > BigInt(max) ? t.id : max;
+  }, null);
 
   const summary = await summarizeTweets({
     tweets: batch.newTweets,
@@ -117,6 +123,7 @@ export async function runTwitterDigestNow() {
     topics: summary.topics,
     status: "completed",
     source: "twitter_api",
+    latestTweetId,
     metadata: {
       title: summary.title,
       twitterMode,

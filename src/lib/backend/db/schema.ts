@@ -95,6 +95,10 @@ async function runMigrations() {
       CREATE INDEX IF NOT EXISTS idx_cron_logs_created_at
       ON cron_logs(created_at DESC);
     `);
+
+    await client.query(`
+      ALTER TABLE digests ADD COLUMN IF NOT EXISTS latest_tweet_id TEXT;
+    `);
   } finally {
     client.release();
   }

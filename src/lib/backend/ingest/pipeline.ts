@@ -51,6 +51,7 @@ export async function persistDigestFromBatch(params: {
   idempotencyKey?: string | null;
   workerRunId?: string | null;
   metadata?: Record<string, unknown> | null;
+  latestTweetId?: string | null;
 }): Promise<{ digestId: number; duplicate: boolean; counts: { fetched: number; unique: number; new: number; seen: number } }> {
   if (params.idempotencyKey) {
     const existing = await getDigestByIdempotencyKey(params.idempotencyKey);
@@ -77,6 +78,7 @@ export async function persistDigestFromBatch(params: {
     source: params.source ?? null,
     idempotencyKey: params.idempotencyKey ?? null,
     workerRunId: params.workerRunId ?? null,
+    latestTweetId: params.latestTweetId ?? null,
     metadata: {
       fetchedCount: params.batch.fetchedTweets.length,
       uniqueCount: params.batch.uniqueTweets.length,
